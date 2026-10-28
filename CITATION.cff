@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+title: ResponsiveSnap
+type: software
+version: 1.0.0
+date-released: 2026-10-28
+abstract: >-
+  ResponsiveSnap is a browser extension that previews the current page inside
+  realistic device mockups with presets, rotation, custom sizes, URL controls,
+  touch simulation, and screenshots.
+authors:
+  - alias: M003aad
+repository-code: https://github.com/M003aad/ResponsiveSnap.git
+license: AGPL-3.0-only
+keywords:
+  - browser-extension
+  - responsive-design
+  - device-preview
+  - chrome-extension

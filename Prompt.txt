@@ -1,0 +1,106 @@
+#workspace
+
+You are an expert open-source software developer, technical writer, and GitHub maintainer.
+
+You are working inside my VS Code workspace. Scan the ENTIRE workspace first, then create (or update, if they already exist) all the standard documentation and repository configuration files listed below, based on the details provided and on what you actually find in the code. Write the files directly into the workspace at the exact paths shown.
+
+### ⚙️ Project Specifications
+1. **Project Name:** ResponsiveSnap
+2. **Project Description:** Test responsive designs instantly with a realistic device mockup injected right into the current tab: presets, rotate, custom sizes, URL bar, touch simulation and screenshots.
+3. **Project Type:** Browser Extension
+4. **License:** AGPL-3.0 
+5. **Security Contact Email:** 188705139+M003aad@users.noreply.github.com
+6. **Author / Maintainer:** M003aad
+7. **Current Version:** 1.0.0
+9. **Install / Run Method:** Load unpacked in Developer Mode
+10. **Repository URL:** https://github.com/M003aad/ResponsiveSnap.git
+
+---
+
+### 📁 Files to Create
+
+**Root files**
+- `README.md`: see "README Rule" below (most important file).
+- `SECURITY.md`: supported versions table; private vulnerability reporting process (GitHub Private Vulnerability Reporting + the email above); response time and patch expectations.
+- `CONTRIBUTING.md`: bug reporting and feature proposal guidelines; step-by-step local development setup; Pull Request standards.
+- `CODE_OF_CONDUCT.md`: Contributor Covenant v2.1, with the security email as the enforcement contact.
+- `SUPPORT.md`: directing users to docs, existing issues, and communication channels.
+- `CITATION.cff`: valid CFF v1.2.0.
+- `CHANGELOG.md`: Keep a Changelog format, with an initial 1.0.0 entry and an "Unreleased" section.
+- `.editorconfig`: sensible defaults (UTF-8, LF, 2-space indent, final newline, trim trailing whitespace).
+- `.gitattributes`: normalize line endings (`* text=auto eol=lf`) and mark binary files properly.
+- `.gitignore`: see ".gitignore Rule" below.
+- `.env.example`: only if the project uses environment variables (see ".env Rule" below).
+- `.prettierrc`: sensible defaults for a JS/TS browser extension.
+- `eslint.config.js`: flat config for a browser extension (browser globals + WebExtension `chrome`/`browser` globals).
+- `SUMMARY.md`: the final report (see "SUMMARY.md Rule" below).
+
+**`.github/` folder**
+- `.github/ISSUE_TEMPLATE/bug_report.md`
+- `.github/ISSUE_TEMPLATE/feature_request.md`
+- `.github/PULL_REQUEST_TEMPLATE.md`
+- `.github/workflows/ci.yml`: on push and pull_request: install, lint, and build/validate the extension (check `manifest.json`).
+- `.github/workflows/release.yml`: on version tag push (`v*`): package the extension into a ZIP and attach it to a GitHub Release.
+
+### 📖 README Rule
+The README must be highly professional, visually clean, scannable, and tailored EXACTLY to the files in this workspace. No generic filler text. Every claim must come from the code, `manifest.json`, `package.json`, or the details I provided. Use proper Markdown (tables, code blocks, lists). Follow this structure, in this order:
+
+1. **Header**: project name, one-line description, and badges (license AGPL-3.0, version, tech stack, CI status if a workflow exists).
+2. **Table of Contents**.
+3. **Overview / Architecture**: the core purpose of the project and the tech stack actually used (languages, frameworks, bundler, Manifest version, target browsers). Briefly explain how the parts fit together (e.g. background/service worker, content scripts, popup, options page).
+4. **Features**: the key functionalities that are actually implemented in the code (verify each one in the source; do not list planned or imaginary features).
+5. **Screenshots**: clearly marked placeholder section.
+6. **Codebase Breakdown**: a folder tree (code block) of the real structure, followed by a table explaining what each main directory and file does. Skip `node_modules`, build output, and ignored files.
+7. **Permissions** (extension only): a table of every permission and host permission in `manifest.json` with a short reason why it is needed. If the reason is not clear from the code, mark it with a placeholder.
+8. **Installation & Setup**: clear, step-by-step instructions: clone, install dependencies, configure environment variables (only if `.env.example` exists: "copy `.env.example` to `.env` and fill in the values"), build, and load the unpacked extension in Chrome/Edge/Firefox (only the browsers the manifest supports).
+9. **Usage**: how to use the extension after installing, based on the actual UI and features found.
+10. **Messaging & API Reference** (include ONLY if applicable): if the code uses `chrome.runtime.sendMessage`, `chrome.runtime.onMessage`, ports, external HTTP APIs, or backend routes, document each one: name/route, direction (who sends to whom), expected payload, and response. Use tables and JSON code blocks. If nothing like this exists, omit the section entirely.
+11. **Scripts**: a table of the `package.json` scripts and what each does (if `package.json` exists).
+12. **Contributing**: short summary with a link to `CONTRIBUTING.md`.
+13. **Security**: short note with a link to `SECURITY.md`.
+14. **License**: short summary of AGPL-3.0 with a link to the `LICENSE` file, plus the author.
+
+### 🙈 .gitignore Rule
+Create or update `.gitignore` based on what the workspace actually uses. Always include:
+- Dependencies: `node_modules/`
+- Build output: `dist/`, `build/`, `out/`, `web-ext-artifacts/`, `*.zip`, `*.crx`, `*.xpi`, `*.pem` (extension signing keys)
+- Environment and secrets: `.env`, `.env.*`, `!.env.example`
+- Logs: `*.log`, `npm-debug.log*`, `yarn-debug.log*`, `yarn-error.log*`, `pnpm-debug.log*`
+- Caches and tooling: `.eslintcache`, `.cache/`, `.parcel-cache/`, `.vite/`, `coverage/`, `*.tsbuildinfo`
+- OS and editor files: `.DS_Store`, `Thumbs.db`, `.idea/`, `*.swp`, and `.vscode/*` (but keep `!.vscode/extensions.json` and `!.vscode/settings.json` only if they already exist in the workspace)
+- The report file: `SUMMARY.md`
+
+Also detect the tools actually used (package manager, bundler, TypeScript, Python, etc.) and add the matching entries. Never ignore files that must stay in the repo (`LICENSE`, `README.md`, `manifest.json`, lockfiles such as `package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`). If `.gitignore` already exists, merge new entries into it without removing existing ones, and show me what you plan to add.
+
+### 🔐 .env Rule
+- Inspect the workspace for environment variable usage: `process.env`, `import.meta.env`, `dotenv`, existing `.env*` files, or build configs that read env vars.
+- If environment variables are used:
+  - Create `.env.example` listing every variable name with an empty or fake placeholder value and a short comment explaining it. NEVER copy real values from an existing `.env`.
+  - Make sure `.env` and `.env.*` are in `.gitignore`, with `!.env.example` so the example stays tracked.
+  - Mention `.env.example` in README.md and CONTRIBUTING.md.
+- If environment variables are NOT used: do not create `.env.example`, and note "No environment variables detected" in SUMMARY.md.
+- Never read out, print, or commit the contents of a real `.env` file.
+- If a real `.env` file seems to be already tracked by git, warn me in SUMMARY.md and tell me to run `git rm --cached .env` and rotate any exposed secrets.
+
+### 🚫 LICENSE Rule (important)
+- Do NOT generate, create, or modify the `LICENSE` file.
+- Check whether a `LICENSE` file exists in the workspace root.
+  - If it exists: leave it untouched and reference it in README.md, CITATION.cff (`license: AGPL-3.0-only`), and the badges.
+  - If it does NOT exist: record "LICENSE file is missing" in SUMMARY.md, and still reference it as AGPL-3.0 in the other files. I will add it manually.
+- Do NOT create or modify `Prompt.txt`.
+
+### 📝 SUMMARY.md Rule
+At the end of the task, create a file named `SUMMARY.md` in the workspace root containing exactly these four sections:
+1. **Files created or changed**: a list of every file you created or modified (mark each as "created" or "updated").
+2. **Placeholders to fill**: a list of every placeholder that still remains, with the file name where it appears.
+3. **LICENSE status**: "Found" or "Missing", with one short sentence of explanation.
+4. **Environment variables**: "Detected" (with the list of variable names only, never values) or "No environment variables detected", plus any warning about a tracked `.env`.
+
+Do not put this report in the chat. Write it only in `SUMMARY.md`, and in the chat just tell me the file was created.
+
+### Rules
+- Before writing, scan the whole workspace (`manifest.json`, `package.json`, source files, configs) and use real values from there when available (name, version, Node version, build scripts, permissions).
+- Use only the details I provided or what you found in the workspace. If something is missing, use a clearly marked placeholder (e.g. `{{PLACEHOLDER}}`) instead of inventing it.
+- If a file already exists, show me what you plan to change instead of silently overwriting it.
+- Keep a clean, professional, industry-standard format.
+- Reply to me in {{English / Arabic / Darija}}, but keep all files themselves in English.

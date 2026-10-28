@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+
+# Build artifacts
+/dist/
+/build/
+/out/
+web-ext-artifacts/
+*.zip
+*.crx
+*.xpi
+*.pem
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Caches and tooling
+.eslintcache
+.cache/
+.parcel-cache/
+.vite/
+coverage/
+*.tsbuildinfo
+
+# Operating systems and editors
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# Generated session report
+SUMMARY.md

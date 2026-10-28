@@ -1,0 +1,785 @@
+/* ==========================================================================
+   ResponsiveSnap – content.css
+   Every rule is namespaced under #responsivesnap-root, so nothing leaks into
+   (or gets broken by) the host page.
+   ========================================================================== */
+
+@keyframes responsivesnap-fade {
+  from { opacity: 0; }
+}
+
+@keyframes responsivesnap-rise {
+  from { opacity: 0; transform: translateY(18px); }
+}
+
+/* --------------------------------------------------------------------------
+   Root
+   -------------------------------------------------------------------------- */
+#responsivesnap-root {
+  all: initial;                 /* shield the overlay from inherited page styles */
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  display: block;
+  overflow: hidden;
+  direction: ltr;               /* `all` keeps `direction`; stop RTL pages flipping us */
+  unicode-bidi: normal;
+  font: 12px/1.35 -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  color: #0f172a;
+
+  --rs-accent: #7c3aed;
+  --rs-ease: cubic-bezier(0.32, 0.72, 0, 1);
+  --rs-dur: 520ms;
+}
+
+#responsivesnap-root *,
+#responsivesnap-root *::before,
+#responsivesnap-root *::after {
+  box-sizing: border-box;
+  margin: 0;                    /* neutralise generic page rules such as `div { padding: … }` */
+  padding: 0;
+  border: 0;
+}
+
+/* Used for the first paint and window resizes: apply changes without animating. */
+#responsivesnap-root.rs-instant,
+#responsivesnap-root.rs-instant *,
+#responsivesnap-root.rs-instant *::before,
+#responsivesnap-root.rs-instant *::after {
+  transition: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   Backdrop + stage
+   -------------------------------------------------------------------------- */
+#responsivesnap-root .rs-backdrop {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(1100px 720px at 22% 12%, rgba(124, 58, 237, 0.2), transparent 62%),
+    rgba(10, 12, 26, 0.46);
+  -webkit-backdrop-filter: blur(12px) saturate(1.15);
+  backdrop-filter: blur(12px) saturate(1.15);
+  animation: responsivesnap-fade 260ms ease-out;
+}
+
+/* The area left of the toolbox. Keep `right` in sync with .rs-sidebar's width. */
+#responsivesnap-root .rs-stage {
+  position: absolute;
+  top: 44px;                    /* below .rs-topbar */
+  left: 0;
+  bottom: 0;
+  right: 50px;
+}
+
+/* --------------------------------------------------------------------------
+   Device frame
+   One element, three modifier classes. Each class only sets custom properties
+   (and, for desktop, a fluid size); the transitions below do the morphing.
+
+     --rs-sw / --rs-sh   screen size in CSS px (also read by content.js to fit)
+     --rs-bezel          bezel thickness in px
+     --rs-radius         outer corner radius
+   -------------------------------------------------------------------------- */
+#responsivesnap-root .rs-device {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;                 /* centre in the stage ...            */
+  scale: var(--rs-scale, 1);            /* ... then shrink to fit (content.js) */
+
+  width: calc(var(--rs-sw) * 1px + var(--rs-bezel) * 2px);
+  height: calc(var(--rs-sh) * 1px + var(--rs-bezel) * 2px);
+  padding: calc(var(--rs-bezel) * 1px);
+  border-radius: var(--rs-radius);
+  background-color: var(--rs-body);
+  box-shadow: var(--rs-shadow);
+
+  animation: responsivesnap-rise 480ms var(--rs-ease);
+  transition:
+    width var(--rs-dur) var(--rs-ease),
+    height var(--rs-dur) var(--rs-ease),
+    padding var(--rs-dur) var(--rs-ease),
+    border-radius var(--rs-dur) var(--rs-ease),
+    scale var(--rs-dur) var(--rs-ease),
+    background-color var(--rs-dur) var(--rs-ease),
+    box-shadow var(--rs-dur) var(--rs-ease);
+}
+
+/* Mobile – iPhone Pro style (393 × 852 screen) */
+#responsivesnap-root .rs-device--mobile {
+  --rs-sw: 393;
+  --rs-sh: 852;
+  --rs-bezel: 12;
+  --rs-radius: 40px;
+  --rs-body: #0a0a0d;
+  --rs-shadow:
+    0 0 0 2px #4a4a52,                          /* titanium rim            */
+    0 0 0 3.5px rgba(0, 0, 0, 0.45),            /* rim edge definition     */
+    inset 0 0 0 1px rgba(255, 255, 255, 0.12),  /* bezel edge highlight    */
+    0 42px 84px -22px rgba(0, 0, 0, 0.62),      /* long soft drop shadow   */
+    0 24px 48px -24px rgba(0, 0, 0, 0.55),
+    0 6px 16px rgba(0, 0, 0, 0.32);             /* contact shadow          */
+}
+
+/* Tablet – iPad style (820 × 1180 screen) */
+#responsivesnap-root .rs-device--tablet {
+  --rs-sw: 820;
+  --rs-sh: 1180;
+  --rs-bezel: 16;
+  --rs-radius: 34px;
+  --rs-body: #0a0a0d;
+  --rs-shadow:
+    0 0 0 2px #4a4a52,
+    0 0 0 3.5px rgba(0, 0, 0, 0.45),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.12),
+    0 42px 84px -22px rgba(0, 0, 0, 0.62),
+    0 24px 48px -24px rgba(0, 0, 0, 0.55),
+    0 6px 16px rgba(0, 0, 0, 0.32);
+}
+
+/* Desktop – a clean, fluid window (90% of the stage) */
+#responsivesnap-root .rs-device--desktop {
+  --rs-bezel: 0;
+  --rs-radius: 12px;
+  --rs-body: #ffffff;
+  --rs-shadow:
+    0 0 0 0 rgba(0, 0, 0, 0),
+    0 0 0 1px rgba(15, 23, 42, 0.22),
+    inset 0 0 0 0 rgba(255, 255, 255, 0),
+    0 42px 84px -22px rgba(0, 0, 0, 0.55),
+    0 24px 48px -24px rgba(0, 0, 0, 0.45),
+    0 6px 16px rgba(0, 0, 0, 0.25);
+  width: 90%;
+  height: 90%;
+}
+
+/* --------------------------------------------------------------------------
+   Screen + iframe
+   -------------------------------------------------------------------------- */
+#responsivesnap-root .rs-screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: calc(var(--rs-radius) - var(--rs-bezel) * 1px);
+  background: #fff;
+  box-shadow: 0 0 0 1px #000;           /* hides the anti-aliasing seam on the bezel */
+  transition: border-radius var(--rs-dur) var(--rs-ease);
+}
+
+#responsivesnap-root .rs-iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: #fff;
+}
+
+/* --------------------------------------------------------------------------
+   Dynamic Island (mobile) – shrinks into the camera dot on tablet
+   -------------------------------------------------------------------------- */
+#responsivesnap-root .rs-island {
+  position: absolute;
+  z-index: 2;
+  top: calc(var(--rs-bezel) * 1px + 11px);
+  left: 50%;
+  translate: -50% 0;
+  width: 124px;
+  height: 36px;
+  border-radius: 20px;
+  background: #000;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  pointer-events: none;
+  transition:
+    top var(--rs-dur) var(--rs-ease),
+    width var(--rs-dur) var(--rs-ease),
+    height var(--rs-dur) var(--rs-ease),
+    border-radius var(--rs-dur) var(--rs-ease),
+    background-color var(--rs-dur) var(--rs-ease),
+    opacity calc(var(--rs-dur) * 0.6) var(--rs-ease);
+}
+
+/* camera lens */
+#responsivesnap-root .rs-island::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  width: 11px;
+  height: 11px;
+  translate: 0 -50%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #35457a 0 14%, #0e1330 46%, #04050b 74%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+  transition: opacity calc(var(--rs-dur) * 0.5) var(--rs-ease);
+}
+
+#responsivesnap-root .rs-device--tablet .rs-island {
+  top: calc(var(--rs-bezel) * 1px / 2 - 3px);   /* sits in the middle of the top bezel */
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #181a22;
+}
+
+#responsivesnap-root .rs-device--tablet .rs-island::before,
+#responsivesnap-root .rs-device--desktop .rs-island::before {
+  opacity: 0;
+}
+
+#responsivesnap-root .rs-device--desktop .rs-island {
+  top: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  opacity: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Home indicator (inverts against whatever the page paints underneath)
+   -------------------------------------------------------------------------- */
+#responsivesnap-root .rs-home {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  bottom: calc(var(--rs-bezel) * 1px + 8px);
+  translate: -50% 0;
+  width: 134px;
+  height: 5px;
+  border-radius: 3px;
+  background: #fff;
+  mix-blend-mode: difference;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    width var(--rs-dur) var(--rs-ease),
+    bottom var(--rs-dur) var(--rs-ease),
+    opacity calc(var(--rs-dur) * 0.6) var(--rs-ease);
+}
+
+#responsivesnap-root .rs-device--mobile .rs-home { opacity: 0.92; }
+
+#responsivesnap-root .rs-device--tablet .rs-home {
+  opacity: 0.92;
+  width: 190px;
+}
+
+/* --------------------------------------------------------------------------
+   Hardware buttons
+   .rs-hw--m = iPhone (action + volume on the left, power on the right)
+   .rs-hw--t = iPad   (power on top, volume on the right)
+   Each set fades in only for its own device.
+   -------------------------------------------------------------------------- */
+#responsivesnap-root .rs-hw {
+  position: absolute;
+  width: 5px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #2a2a30 0%, #5a5a63 50%, #25252b 100%);
+  box-shadow:
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.14),
+    0 1px 3px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity calc(var(--rs-dur) * 0.6) var(--rs-ease);
+}
+
+#responsivesnap-root .rs-device--mobile .rs-hw--m,
+#responsivesnap-root .rs-device--tablet .rs-hw--t {
+  opacity: 1;
+}
+
+/* iPhone */
+#responsivesnap-root .rs-hw--action,
+#responsivesnap-root .rs-hw--vol-up,
+#responsivesnap-root .rs-hw--vol-down {
+  left: -5px;
+  border-radius: 3px 0 0 3px;
+}
+#responsivesnap-root .rs-hw--action   { top: 118px; height: 30px; }
+#responsivesnap-root .rs-hw--vol-up   { top: 176px; height: 56px; }
+#responsivesnap-root .rs-hw--vol-down { top: 244px; height: 56px; }
+
+#responsivesnap-root .rs-hw--power {
+  right: -5px;
+  top: 206px;
+  height: 96px;
+  border-radius: 0 3px 3px 0;
+}
+
+/* iPad */
+#responsivesnap-root .rs-hw--top-power {
+  top: -5px;
+  right: 92px;
+  width: 54px;
+  height: 5px;
+  border-radius: 3px 3px 0 0;
+  background: linear-gradient(0deg, #25252b 0%, #5a5a63 50%, #2a2a30 100%);
+}
+
+#responsivesnap-root .rs-hw--side-up,
+#responsivesnap-root .rs-hw--side-down {
+  right: -5px;
+  height: 46px;
+  border-radius: 0 3px 3px 0;
+}
+#responsivesnap-root .rs-hw--side-up   { top: 104px; }
+#responsivesnap-root .rs-hw--side-down { top: 158px; }
+
+/* --------------------------------------------------------------------------
+   Toolbox sidebar
+   -------------------------------------------------------------------------- */
+#responsivesnap-root .rs-sidebar {
+  position: fixed;
+  right: 0;
+  top: 0;
+  height: 100vh;
+  width: 50px;
+  z-index: 999999;
+  overflow-y: auto;
+  scrollbar-width: none;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 0;
+
+  background: rgba(255, 255, 255, 0.88);
+  -webkit-backdrop-filter: blur(18px) saturate(1.5);
+  backdrop-filter: blur(18px) saturate(1.5);
+  border-left: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+#responsivesnap-root .rs-sep {
+  display: block;
+  flex: none;
+  width: 20px;
+  height: 1px;
+  margin: 6px 0;
+  background: rgba(15, 23, 42, 0.12);
+}
+
+#responsivesnap-root .rs-tool {
+  all: unset;
+  box-sizing: border-box;
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  color: #475569;
+  cursor: pointer;
+  transition: background-color 140ms ease, color 140ms ease, transform 140ms ease;
+}
+
+#responsivesnap-root .rs-tool:hover {
+  background: rgba(15, 23, 42, 0.07);
+  color: #0f172a;
+}
+
+#responsivesnap-root .rs-tool:active {
+  transform: scale(0.93);
+}
+
+#responsivesnap-root .rs-tool:focus-visible {
+  outline: 2px solid var(--rs-accent);
+  outline-offset: 1px;
+}
+
+#responsivesnap-root .rs-tool.is-active {
+  background: rgba(124, 58, 237, 0.13);
+  color: #6d28d9;
+}
+
+#responsivesnap-root .rs-tool--close:hover {
+  background: rgba(220, 38, 38, 0.12);
+  color: #dc2626;
+}
+
+#responsivesnap-root .rs-tool svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+#responsivesnap-root .rs-tool svg * {
+  fill: none;
+  stroke: currentColor;
+}
+
+/* --------------------------------------------------------------------------
+   Fixed-size desktop (custom / preset sizes) – the fluid one keeps 90% × 90%
+   -------------------------------------------------------------------------- */
+#responsivesnap-root .rs-device--desktop.rs-fixed {
+  width: calc(var(--rs-sw) * 1px + var(--rs-bezel) * 2px);
+  height: calc(var(--rs-sh) * 1px + var(--rs-bezel) * 2px);
+}
+
+/* --------------------------------------------------------------------------
+   Landscape (phone / tablet): island and camera move to the left edge,
+   side buttons are hidden
+   -------------------------------------------------------------------------- */
+#responsivesnap-root .rs-landscape .rs-hw { opacity: 0 !important; }
+
+#responsivesnap-root .rs-device--mobile.rs-landscape .rs-island {
+  top: 50%;
+  left: calc(var(--rs-bezel) * 1px + 11px);
+  translate: 0 -50%;
+  width: 36px;
+  height: 124px;
+}
+#responsivesnap-root .rs-device--mobile.rs-landscape .rs-island::before {
+  top: 14px;
+  right: auto;
+  left: 50%;
+  translate: -50% 0;
+}
+#responsivesnap-root .rs-device--tablet.rs-landscape .rs-island {
+  top: 50%;
+  left: calc(var(--rs-bezel) * 1px / 2 - 3px);
+  translate: 0 -50%;
+}
+
+/* --------------------------------------------------------------------------
+   Top bar: preset, size, URL, status
+   -------------------------------------------------------------------------- */
+#responsivesnap-root .rs-topbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 50px;
+  height: 44px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  background: rgba(255, 255, 255, 0.88);
+  -webkit-backdrop-filter: blur(18px) saturate(1.5);
+  backdrop-filter: blur(18px) saturate(1.5);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+#responsivesnap-root .rs-select,
+#responsivesnap-root .rs-input {
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.05);
+  color: #0f172a;
+  font: inherit;
+  outline: none;
+  transition: background-color 140ms ease, border-color 140ms ease;
+}
+#responsivesnap-root .rs-select { max-width: 190px; cursor: pointer; }
+#responsivesnap-root .rs-select:focus,
+#responsivesnap-root .rs-input:focus {
+  background: #fff;
+  border-color: var(--rs-accent);
+}
+#responsivesnap-root .rs-num {
+  width: 60px;
+  text-align: center;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+#responsivesnap-root .rs-num::-webkit-inner-spin-button,
+#responsivesnap-root .rs-num::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+#responsivesnap-root .rs-url { flex: 1; min-width: 120px; }
+#responsivesnap-root .rs-x { color: #94a3b8; }
+#responsivesnap-root .rs-vsep {
+  flex: none;
+  width: 1px;
+  height: 20px;
+  background: rgba(15, 23, 42, 0.12);
+}
+#responsivesnap-root .rs-tool--sm { width: 28px; height: 28px; border-radius: 8px; }
+#responsivesnap-root .rs-tool--sm svg { width: 16px; height: 16px; }
+
+#responsivesnap-root .rs-status {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.05);
+  color: #475569;
+  white-space: nowrap;
+}
+#responsivesnap-root .rs-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #94a3b8;
+}
+#responsivesnap-root .rs-status[data-kind='ok'] .rs-status-dot { background: #16a34a; }
+#responsivesnap-root .rs-status[data-kind='loading'] .rs-status-dot,
+#responsivesnap-root .rs-status[data-kind='slow'] .rs-status-dot { background: #d97706; }
+#responsivesnap-root .rs-status[data-kind='loading'] .rs-status-dot { animation: responsivesnap-pulse 900ms ease-in-out infinite; }
+#responsivesnap-root .rs-status[data-kind='error'] { color: #b91c1c; background: rgba(220, 38, 38, 0.1); }
+#responsivesnap-root .rs-status[data-kind='error'] .rs-status-dot { background: #dc2626; }
+
+@keyframes responsivesnap-pulse { 50% { opacity: 0.25; } }
+
+@media (max-width: 900px) {
+  #responsivesnap-root .rs-status-text { display: none; }
+  #responsivesnap-root .rs-status { padding: 0 9px; }
+}
+@media (max-width: 700px) {
+  #responsivesnap-root .rs-num,
+  #responsivesnap-root .rs-x { display: none; }
+}
+
+/* --------------------------------------------------------------------------
+   Ruler + resize grip (children of the device, counter-scaled so they stay
+   the same size on screen however much the device is shrunk)
+   -------------------------------------------------------------------------- */
+#responsivesnap-root .rs-ruler {
+  position: absolute;
+  z-index: 3;
+  left: 0;
+  right: 0;
+  top: calc(-26px / var(--rs-scale, 1));
+  height: calc(12px / var(--rs-scale, 1));
+  border-style: solid;
+  border-color: rgba(255, 255, 255, 0.6);
+  border-width: 0 calc(1.5px / var(--rs-scale, 1));
+  pointer-events: none;
+}
+#responsivesnap-root .rs-ruler::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: calc(1.5px / var(--rs-scale, 1));
+  background: rgba(255, 255, 255, 0.6);
+}
+#responsivesnap-root .rs-ruler-label {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  padding: calc(2px / var(--rs-scale, 1)) calc(9px / var(--rs-scale, 1));
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.82);
+  color: #fff;
+  font-size: calc(11px / var(--rs-scale, 1));
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+#responsivesnap-root .rs-grip {
+  position: absolute;
+  z-index: 3;
+  right: calc(-20px / var(--rs-scale, 1));
+  bottom: calc(-20px / var(--rs-scale, 1));
+  width: calc(22px / var(--rs-scale, 1));
+  height: calc(22px / var(--rs-scale, 1));
+  color: rgba(255, 255, 255, 0.75);
+  cursor: nwse-resize;
+  touch-action: none;
+}
+#responsivesnap-root .rs-grip:hover { color: #fff; }
+#responsivesnap-root .rs-grip svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+#responsivesnap-root.rs-resizing .rs-iframe { pointer-events: none; }
+#responsivesnap-root.rs-capturing .rs-ruler,
+#responsivesnap-root.rs-capturing .rs-grip,
+#responsivesnap-root.rs-capturing .rs-panel,
+#responsivesnap-root.rs-capturing .rs-toast { visibility: hidden; }
+
+/* --------------------------------------------------------------------------
+   Load-failure screen (inside the device)
+   -------------------------------------------------------------------------- */
+#responsivesnap-root .rs-fail {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px;
+  text-align: center;
+  background: #f8fafc;
+  color: #0f172a;
+}
+#responsivesnap-root .rs-fail.is-visible { display: flex; }
+#responsivesnap-root .rs-fail h3 { font-size: 17px; font-weight: 600; }
+#responsivesnap-root .rs-fail p { max-width: 300px; font-size: 13px; color: #475569; }
+#responsivesnap-root .rs-fail-actions { display: flex; gap: 8px; margin-top: 6px; }
+
+/* --------------------------------------------------------------------------
+   Buttons, sidebar extras, panels, toast
+   -------------------------------------------------------------------------- */
+#responsivesnap-root .rs-btn {
+  all: unset;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 8px;
+  background: var(--rs-accent);
+  color: #fff;
+  font: 600 12px/1 -apple-system, 'Segoe UI', Roboto, sans-serif;
+  cursor: pointer;
+}
+#responsivesnap-root .rs-btn:hover { filter: brightness(1.1); }
+#responsivesnap-root .rs-btn:focus-visible { outline: 2px solid var(--rs-accent); outline-offset: 2px; }
+#responsivesnap-root .rs-btn--ghost { background: rgba(15, 23, 42, 0.08); color: #0f172a; }
+#responsivesnap-root .rs-btn--block { display: flex; width: 100%; margin-top: 6px; }
+
+#responsivesnap-root .rs-spacer { flex: 1; }
+#responsivesnap-root .rs-tool.is-dim { opacity: 0.4; }
+
+#responsivesnap-root .rs-panel {
+  position: absolute;
+  top: 52px;
+  right: 60px;
+  z-index: 6;
+  display: none;
+  width: 270px;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.97);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28), 0 0 0 1px rgba(15, 23, 42, 0.08);
+}
+#responsivesnap-root .rs-panel.is-open { display: block; }
+#responsivesnap-root .rs-panel h4 { margin-bottom: 8px; font-size: 13px; font-weight: 600; }
+#responsivesnap-root .rs-hint { margin-top: 10px; font-size: 11px; color: #64748b; }
+#responsivesnap-root .rs-row { display: flex; gap: 8px; }
+#responsivesnap-root .rs-row .rs-input { flex: 1; min-width: 0; }
+#responsivesnap-root .rs-saved { margin-top: 8px; }
+#responsivesnap-root .rs-saved-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 0;
+}
+#responsivesnap-root .rs-saved-row span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+#responsivesnap-root .rs-keys > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 3px 0;
+}
+#responsivesnap-root kbd {
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: rgba(15, 23, 42, 0.08);
+  font: 600 11px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+  white-space: pre;
+}
+#responsivesnap-root .rs-btn kbd { background: rgba(255, 255, 255, 0.22); color: inherit; }
+#responsivesnap-root .rs-btn--ghost kbd { background: rgba(15, 23, 42, 0.1); }
+
+#responsivesnap-root .rs-toast {
+  position: absolute;
+  left: calc(50% - 25px);
+  bottom: 22px;
+  z-index: 7;
+  translate: -50% 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.9);
+  color: #fff;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease, translate 180ms ease;
+}
+#responsivesnap-root .rs-toast.is-visible { opacity: 1; translate: -50% 0; }
+
+
+/* --------------------------------------------------------------------------
+   Breakpoint ticks on the ruler, design overlay, vision filter defs, view panel
+   -------------------------------------------------------------------------- */
+#responsivesnap-root .rs-tick {
+  position: absolute;
+  top: calc(-3px / var(--rs-scale, 1));
+  bottom: calc(-3px / var(--rs-scale, 1));
+  width: 0;
+  border-left: calc(1.5px / var(--rs-scale, 1)) dashed rgba(255, 255, 255, 0.45);
+  pointer-events: none;
+}
+#responsivesnap-root .rs-tick-label {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 2px / var(--rs-scale, 1));
+  translate: -50% 0;
+  font-size: calc(9px / var(--rs-scale, 1));
+  line-height: 1.2;
+  color: rgba(255, 255, 255, 0.7);
+  white-space: nowrap;
+}
+#responsivesnap-root .rs-tick.is-current { border-left-color: #a78bfa; }
+#responsivesnap-root .rs-tick.is-current .rs-tick-label { color: #fff; font-weight: 600; }
+
+#responsivesnap-root .rs-design {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: none;
+  pointer-events: none;
+  background-repeat: no-repeat;
+  background-size: 100% auto;
+  background-position: center 0;
+}
+#responsivesnap-root .rs-design.is-visible { display: block; }
+
+#responsivesnap-root .rs-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+#responsivesnap-root .rs-panel[data-panel='view'] { max-height: calc(100vh - 70px); overflow-y: auto; }
+#responsivesnap-root .rs-panel .rs-select { width: 100%; max-width: none; }
+#responsivesnap-root .rs-h4-gap { margin-top: 14px; }
+#responsivesnap-root .rs-field { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; color: #334155; }
+#responsivesnap-root .rs-field--inline { flex-direction: row; align-items: center; gap: 8px; }
+#responsivesnap-root .rs-range { width: 100%; accent-color: var(--rs-accent); }
+#responsivesnap-root .rs-panel .rs-row + .rs-field { margin-top: 10px; }
+
+/* --------------------------------------------------------------------------
+   Reduced motion
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  #responsivesnap-root,
+  #responsivesnap-root *,
+  #responsivesnap-root *::before,
+  #responsivesnap-root *::after {
+    transition-duration: 1ms !important;
+    animation-duration: 1ms !important;
+  }
+}
